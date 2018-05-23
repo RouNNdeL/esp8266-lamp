@@ -203,36 +203,6 @@
 <text x="0" y="0" size="1.27" layer="25" align="center">&gt;Name</text>
 <text x="0" y="-1.905" size="1.27" layer="27" align="center">&gt;Value</text>
 </package>
-<package name="SMD_BUTTON" urn="urn:adsk.eagle:footprint:2954921/2" library_version="52">
-<smd name="P$1" x="3.1" y="1.85" dx="1.8" dy="1.1" layer="1"/>
-<smd name="P$2" x="3.1" y="-1.85" dx="1.8" dy="1.1" layer="1"/>
-<smd name="P$3" x="-3.1" y="1.85" dx="1.8" dy="1.1" layer="1"/>
-<smd name="P$4" x="-3.1" y="-1.85" dx="1.8" dy="1.1" layer="1"/>
-<wire x1="-1.75" y1="-2.75" x2="1.75" y2="-2.75" width="0.127" layer="21"/>
-<wire x1="2" y1="-2.5" x2="1.75" y2="-2.75" width="0.127" layer="21"/>
-<wire x1="-2" y1="-2.5" x2="-1.75" y2="-2.75" width="0.127" layer="21"/>
-<wire x1="-2.75" y1="-1" x2="-2.75" y2="1" width="0.127" layer="21"/>
-<wire x1="-2" y1="2.5" x2="-1.75" y2="2.75" width="0.127" layer="21"/>
-<wire x1="-1.75" y1="2.75" x2="1.75" y2="2.75" width="0.127" layer="21"/>
-<wire x1="1.75" y1="2.75" x2="2" y2="2.5" width="0.127" layer="21"/>
-<wire x1="2.75" y1="1" x2="2.75" y2="-1" width="0.127" layer="21"/>
-<wire x1="0" y1="0.5" x2="0" y2="-0.5" width="0.127" layer="21"/>
-<wire x1="-0.5" y1="0" x2="0.5" y2="0" width="0.127" layer="21"/>
-</package>
-<package name="B3F-1000" urn="urn:adsk.eagle:footprint:225877/3" library_version="42">
-<wire x1="-3.25" y1="-1.25" x2="-3.25" y2="1.25" width="0.127" layer="21"/>
-<wire x1="-2.25" y1="2.25" x2="2.25" y2="2.25" width="0.127" layer="21"/>
-<wire x1="3.25" y1="1.25" x2="3.25" y2="-1.25" width="0.127" layer="21"/>
-<wire x1="2.25" y1="-2.25" x2="-2.25" y2="-2.25" width="0.127" layer="21"/>
-<wire x1="0" y1="0.5" x2="0" y2="-0.5" width="0.127" layer="21"/>
-<wire x1="-0.5" y1="0" x2="0.5" y2="0" width="0.127" layer="21"/>
-<text x="-3.25" y="4" size="1.27" layer="25">&gt;Name</text>
-<text x="-3.25" y="-4.5" size="1.27" layer="27">&gt;Value</text>
-<pad name="1" x="-3.25" y="2.25" drill="1" diameter="1.778"/>
-<pad name="2" x="3.25" y="2.25" drill="1" diameter="1.778"/>
-<pad name="4" x="3.25" y="-2.25" drill="1" diameter="1.778"/>
-<pad name="3" x="-3.25" y="-2.25" drill="1" diameter="1.778"/>
-</package>
 <package name="IRM-03-5S" urn="urn:adsk.eagle:footprint:2604772/3" library_version="48">
 <wire x1="-18.5" y1="12" x2="18.5" y2="12" width="0.127" layer="21"/>
 <wire x1="18.5" y1="12" x2="18.5" y2="-12" width="0.127" layer="21"/>
@@ -301,18 +271,54 @@ Source: http://www.analog.com/UploadedFiles/Data_Sheets/346131962AD8067_a.pdf</d
 <rectangle x1="0.7" y1="0.775" x2="1.2" y2="1.425" layer="51"/>
 <rectangle x1="-1.2" y1="0.775" x2="-0.7" y2="1.425" layer="51"/>
 </package>
+<package name="TACTILE_SWITCH_SMD_6.2MM_TALL" urn="urn:adsk.eagle:footprint:40107/1" library_version="54">
+<description>&lt;h3&gt;Momentary Switch (Pushbutton) - SPST - SMD, 6.2mm Square&lt;/h3&gt;
+&lt;p&gt;Normally-open (NO) SPST momentary switches (buttons, pushbuttons).&lt;/p&gt;
+&lt;p&gt;&lt;a href="http://www.apem.com/files/apem/brochures/ADTS6-ADTSM-KTSC6.pdf"&gt;Datasheet&lt;/a&gt; (ADTSM63NVTR)&lt;/p&gt;</description>
+<wire x1="-3" y1="-3" x2="3" y2="-3" width="0.2032" layer="21"/>
+<wire x1="3" y1="-3" x2="3" y2="3" width="0.2032" layer="21"/>
+<wire x1="3" y1="3" x2="-3" y2="3" width="0.2032" layer="21"/>
+<wire x1="-3" y1="3" x2="-3" y2="-3" width="0.2032" layer="21"/>
+<circle x="0" y="0" radius="1.75" width="0.2032" layer="21"/>
+<smd name="A1" x="-3.975" y="-2.25" dx="1.3" dy="1.55" layer="1" rot="R90"/>
+<smd name="A2" x="3.975" y="-2.25" dx="1.3" dy="1.55" layer="1" rot="R90"/>
+<smd name="B1" x="-3.975" y="2.25" dx="1.3" dy="1.55" layer="1" rot="R90"/>
+<smd name="B2" x="3.975" y="2.25" dx="1.3" dy="1.55" layer="1" rot="R90"/>
+<text x="0" y="3.175" size="0.6096" layer="25" font="vector" ratio="20" align="bottom-center">&gt;Name</text>
+<text x="0" y="-3.175" size="0.6096" layer="27" font="vector" ratio="20" align="top-center">&gt;Value</text>
+</package>
+<package name="B3F-1000" urn="urn:adsk.eagle:footprint:225877/3" library_version="54">
+<wire x1="-3.25" y1="-1.25" x2="-3.25" y2="1.25" width="0.127" layer="21"/>
+<wire x1="-2.25" y1="2.25" x2="2.25" y2="2.25" width="0.127" layer="21"/>
+<wire x1="3.25" y1="1.25" x2="3.25" y2="-1.25" width="0.127" layer="21"/>
+<wire x1="2.25" y1="-2.25" x2="-2.25" y2="-2.25" width="0.127" layer="21"/>
+<wire x1="0" y1="0.5" x2="0" y2="-0.5" width="0.127" layer="21"/>
+<wire x1="-0.5" y1="0" x2="0.5" y2="0" width="0.127" layer="21"/>
+<text x="-3.25" y="4" size="1.27" layer="25">&gt;Name</text>
+<text x="-3.25" y="-4.5" size="1.27" layer="27">&gt;Value</text>
+<pad name="1" x="-3.25" y="2.25" drill="1" diameter="1.778"/>
+<pad name="2" x="3.25" y="2.25" drill="1" diameter="1.778"/>
+<pad name="4" x="3.25" y="-2.25" drill="1" diameter="1.778"/>
+<pad name="3" x="-3.25" y="-2.25" drill="1" diameter="1.778"/>
+</package>
+<package name="SMD_BUTTON" urn="urn:adsk.eagle:footprint:2954921/2" library_version="54">
+<smd name="P$1" x="3.1" y="1.85" dx="1.8" dy="1.1" layer="1"/>
+<smd name="P$2" x="3.1" y="-1.85" dx="1.8" dy="1.1" layer="1"/>
+<smd name="P$3" x="-3.1" y="1.85" dx="1.8" dy="1.1" layer="1"/>
+<smd name="P$4" x="-3.1" y="-1.85" dx="1.8" dy="1.1" layer="1"/>
+<wire x1="-1.75" y1="-2.75" x2="1.75" y2="-2.75" width="0.127" layer="21"/>
+<wire x1="2" y1="-2.5" x2="1.75" y2="-2.75" width="0.127" layer="21"/>
+<wire x1="-2" y1="-2.5" x2="-1.75" y2="-2.75" width="0.127" layer="21"/>
+<wire x1="-2.75" y1="-1" x2="-2.75" y2="1" width="0.127" layer="21"/>
+<wire x1="-2" y1="2.5" x2="-1.75" y2="2.75" width="0.127" layer="21"/>
+<wire x1="-1.75" y1="2.75" x2="1.75" y2="2.75" width="0.127" layer="21"/>
+<wire x1="1.75" y1="2.75" x2="2" y2="2.5" width="0.127" layer="21"/>
+<wire x1="2.75" y1="1" x2="2.75" y2="-1" width="0.127" layer="21"/>
+<wire x1="0" y1="0.5" x2="0" y2="-0.5" width="0.127" layer="21"/>
+<wire x1="-0.5" y1="0" x2="0.5" y2="0" width="0.127" layer="21"/>
+</package>
 </packages>
 <packages3d>
-<package3d name="SMD_BUTTON" urn="urn:adsk.eagle:package:2954938/2" type="box" library_version="52">
-<packageinstances>
-<packageinstance name="SMD_BUTTON"/>
-</packageinstances>
-</package3d>
-<package3d name="B3F-1000" urn="urn:adsk.eagle:package:225883/4" type="model" library_version="42">
-<packageinstances>
-<packageinstance name="B3F-1000"/>
-</packageinstances>
-</package3d>
 <package3d name="IRM-03-5S" urn="urn:adsk.eagle:package:2604773/3" type="box" library_version="48">
 <packageinstances>
 <packageinstance name="IRM-03-5S"/>
@@ -338,6 +344,24 @@ Source: http://www.analog.com/UploadedFiles/Data_Sheets/346131962AD8067_a.pdf</d
 Source: http://www.analog.com/UploadedFiles/Data_Sheets/346131962AD8067_a.pdf</description>
 <packageinstances>
 <packageinstance name="SOT23-5"/>
+</packageinstances>
+</package3d>
+<package3d name="TACTILE_SWITCH_SMD_6.2MM_TALL" urn="urn:adsk.eagle:package:3123504/1" type="box" library_version="54">
+<description>Momentary Switch (Pushbutton) - SPST - SMD, 6.2mm Square
+Normally-open (NO) SPST momentary switches (buttons, pushbuttons).
+Datasheet (ADTSM63NVTR)</description>
+<packageinstances>
+<packageinstance name="TACTILE_SWITCH_SMD_6.2MM_TALL"/>
+</packageinstances>
+</package3d>
+<package3d name="B3F-1000" urn="urn:adsk.eagle:package:225883/4" type="model" library_version="54">
+<packageinstances>
+<packageinstance name="B3F-1000"/>
+</packageinstances>
+</package3d>
+<package3d name="SMD_BUTTON" urn="urn:adsk.eagle:package:2954938/2" type="box" library_version="54">
+<packageinstances>
+<packageinstance name="SMD_BUTTON"/>
 </packageinstances>
 </package3d>
 </packages3d>
@@ -369,17 +393,6 @@ Source: http://www.analog.com/UploadedFiles/Data_Sheets/346131962AD8067_a.pdf</d
 <wire x1="7.62" y1="13.97" x2="-5.08" y2="13.97" width="0.254" layer="94"/>
 <text x="-2.8575" y="11.90625" size="1.778" layer="94">Antenna</text>
 <circle x="-8.89" y="12.7" radius="1.27" width="0.254" layer="94"/>
-</symbol>
-<symbol name="PUSHBUTTON" urn="urn:adsk.eagle:symbol:225876/1" library_version="42">
-<wire x1="-2.54" y1="1.27" x2="0" y2="1.27" width="0.254" layer="94"/>
-<wire x1="0" y1="1.27" x2="2.54" y2="1.27" width="0.254" layer="94"/>
-<wire x1="-0.635" y1="2.286" x2="0" y2="2.286" width="0.254" layer="94"/>
-<wire x1="0" y1="2.286" x2="0.635" y2="2.286" width="0.254" layer="94"/>
-<wire x1="0" y1="1.27" x2="0" y2="2.286" width="0.254" layer="94"/>
-<text x="-2.54" y="3.556" size="1.27" layer="95">&gt;NAME</text>
-<text x="-2.54" y="-2.286" size="1.27" layer="96">&gt;VALUE</text>
-<pin name="P$1" x="-5.08" y="0" visible="off" length="short" direction="pas"/>
-<pin name="P$2" x="5.08" y="0" visible="off" length="short" direction="pas" rot="R180"/>
 </symbol>
 <symbol name="IRM-03-5" urn="urn:adsk.eagle:symbol:2604751/1" library_version="43">
 <wire x1="-12.7" y1="-5.08" x2="-12.7" y2="5.08" width="0.254" layer="94"/>
@@ -417,6 +430,17 @@ Source: http://www.analog.com/UploadedFiles/Data_Sheets/346131962AD8067_a.pdf</d
 <pin name="SCL" x="12.7" y="2.54" length="middle" rot="R180"/>
 <pin name="SDA" x="12.7" y="-2.54" length="middle" rot="R180"/>
 </symbol>
+<symbol name="PUSHBUTTON" urn="urn:adsk.eagle:symbol:225876/1" library_version="54">
+<wire x1="-2.54" y1="1.27" x2="0" y2="1.27" width="0.254" layer="94"/>
+<wire x1="0" y1="1.27" x2="2.54" y2="1.27" width="0.254" layer="94"/>
+<wire x1="-0.635" y1="2.286" x2="0" y2="2.286" width="0.254" layer="94"/>
+<wire x1="0" y1="2.286" x2="0.635" y2="2.286" width="0.254" layer="94"/>
+<wire x1="0" y1="1.27" x2="0" y2="2.286" width="0.254" layer="94"/>
+<text x="-2.54" y="3.556" size="1.27" layer="95">&gt;NAME</text>
+<text x="-2.54" y="-2.286" size="1.27" layer="96">&gt;VALUE</text>
+<pin name="P$1" x="-5.08" y="0" visible="off" length="short" direction="pas"/>
+<pin name="P$2" x="5.08" y="0" visible="off" length="short" direction="pas" rot="R180"/>
+</symbol>
 </symbols>
 <devicesets>
 <deviceset name="ESP-07" urn="urn:adsk.eagle:component:2954240/2" library_version="50">
@@ -445,37 +469,6 @@ Source: http://www.analog.com/UploadedFiles/Data_Sheets/346131962AD8067_a.pdf</d
 </connects>
 <package3dinstances>
 <package3dinstance package3d_urn="urn:adsk.eagle:package:2954232/2"/>
-</package3dinstances>
-<technologies>
-<technology name=""/>
-</technologies>
-</device>
-</devices>
-</deviceset>
-<deviceset name="BUTTON" urn="urn:adsk.eagle:component:225886/41" library_version="52">
-<gates>
-<gate name="G$1" symbol="PUSHBUTTON" x="0" y="0"/>
-</gates>
-<devices>
-<device name="THT" package="B3F-1000">
-<connects>
-<connect gate="G$1" pin="P$1" pad="1 2" route="any"/>
-<connect gate="G$1" pin="P$2" pad="3 4" route="any"/>
-</connects>
-<package3dinstances>
-<package3dinstance package3d_urn="urn:adsk.eagle:package:225883/4"/>
-</package3dinstances>
-<technologies>
-<technology name=""/>
-</technologies>
-</device>
-<device name="SMD" package="SMD_BUTTON">
-<connects>
-<connect gate="G$1" pin="P$1" pad="P$1 P$3" route="any"/>
-<connect gate="G$1" pin="P$2" pad="P$2 P$4" route="any"/>
-</connects>
-<package3dinstances>
-<package3dinstance package3d_urn="urn:adsk.eagle:package:2954938/2"/>
 </package3dinstances>
 <technologies>
 <technology name=""/>
@@ -552,6 +545,49 @@ Source: http://www.analog.com/UploadedFiles/Data_Sheets/346131962AD8067_a.pdf</d
 </connects>
 <package3dinstances>
 <package3dinstance package3d_urn="urn:adsk.eagle:package:2959492/1"/>
+</package3dinstances>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+</devices>
+</deviceset>
+<deviceset name="BUTTON" urn="urn:adsk.eagle:component:225886/42" library_version="54">
+<gates>
+<gate name="G$1" symbol="PUSHBUTTON" x="0" y="0"/>
+</gates>
+<devices>
+<device name="THT" package="B3F-1000">
+<connects>
+<connect gate="G$1" pin="P$1" pad="1 2" route="any"/>
+<connect gate="G$1" pin="P$2" pad="3 4" route="any"/>
+</connects>
+<package3dinstances>
+<package3dinstance package3d_urn="urn:adsk.eagle:package:225883/4"/>
+</package3dinstances>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+<device name="SMD" package="SMD_BUTTON">
+<connects>
+<connect gate="G$1" pin="P$1" pad="P$1 P$3" route="any"/>
+<connect gate="G$1" pin="P$2" pad="P$2 P$4" route="any"/>
+</connects>
+<package3dinstances>
+<package3dinstance package3d_urn="urn:adsk.eagle:package:2954938/2"/>
+</package3dinstances>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+<device name="" package="TACTILE_SWITCH_SMD_6.2MM_TALL">
+<connects>
+<connect gate="G$1" pin="P$1" pad="A1 A2" route="any"/>
+<connect gate="G$1" pin="P$2" pad="B1 B2" route="any"/>
+</connects>
+<package3dinstances>
+<package3dinstance package3d_urn="urn:adsk.eagle:package:3123504/1"/>
 </package3dinstances>
 <technologies>
 <technology name=""/>
@@ -21400,6 +21436,129 @@ part number 2062-2P from STA</description>
 </deviceset>
 </devicesets>
 </library>
+<library name="jumper" urn="urn:adsk.eagle:library:252">
+<description>&lt;b&gt;Jumpers&lt;/b&gt;&lt;p&gt;
+&lt;author&gt;Created by librarian@cadsoft.de&lt;/author&gt;</description>
+<packages>
+<package name="SJ" urn="urn:adsk.eagle:footprint:15432/1" library_version="1">
+<description>&lt;b&gt;Solder jumper&lt;/b&gt;</description>
+<wire x1="1.397" y1="-1.016" x2="-1.397" y2="-1.016" width="0.1524" layer="21"/>
+<wire x1="1.397" y1="1.016" x2="1.651" y2="0.762" width="0.1524" layer="21" curve="-90"/>
+<wire x1="-1.651" y1="0.762" x2="-1.397" y2="1.016" width="0.1524" layer="21" curve="-90"/>
+<wire x1="-1.651" y1="-0.762" x2="-1.397" y2="-1.016" width="0.1524" layer="21" curve="90"/>
+<wire x1="1.397" y1="-1.016" x2="1.651" y2="-0.762" width="0.1524" layer="21" curve="90"/>
+<wire x1="1.651" y1="-0.762" x2="1.651" y2="0.762" width="0.1524" layer="21"/>
+<wire x1="-1.651" y1="-0.762" x2="-1.651" y2="0.762" width="0.1524" layer="21"/>
+<wire x1="-1.397" y1="1.016" x2="1.397" y2="1.016" width="0.1524" layer="21"/>
+<wire x1="1.016" y1="0" x2="1.524" y2="0" width="0.1524" layer="51"/>
+<wire x1="-1.016" y1="0" x2="-1.524" y2="0" width="0.1524" layer="51"/>
+<wire x1="-0.254" y1="-0.127" x2="-0.254" y2="0.127" width="1.27" layer="51" curve="-180" cap="flat"/>
+<wire x1="0.254" y1="0.127" x2="0.254" y2="-0.127" width="1.27" layer="51" curve="-180" cap="flat"/>
+<smd name="1" x="-0.762" y="0" dx="1.1684" dy="1.6002" layer="1"/>
+<smd name="2" x="0.762" y="0" dx="1.1684" dy="1.6002" layer="1"/>
+<text x="-1.651" y="1.143" size="1.27" layer="25" ratio="10">&gt;NAME</text>
+<text x="0.4001" y="0" size="0.02" layer="27">&gt;VALUE</text>
+<rectangle x1="-0.0762" y1="-0.9144" x2="0.0762" y2="0.9144" layer="29"/>
+</package>
+<package name="SJW" urn="urn:adsk.eagle:footprint:15433/1" library_version="1">
+<description>&lt;b&gt;Solder jumper&lt;/b&gt;</description>
+<wire x1="1.905" y1="-1.524" x2="-1.905" y2="-1.524" width="0.1524" layer="21"/>
+<wire x1="1.905" y1="1.524" x2="2.159" y2="1.27" width="0.1524" layer="21" curve="-90"/>
+<wire x1="-2.159" y1="1.27" x2="-1.905" y2="1.524" width="0.1524" layer="21" curve="-90"/>
+<wire x1="-2.159" y1="-1.27" x2="-1.905" y2="-1.524" width="0.1524" layer="21" curve="90"/>
+<wire x1="1.905" y1="-1.524" x2="2.159" y2="-1.27" width="0.1524" layer="21" curve="90"/>
+<wire x1="2.159" y1="-1.27" x2="2.159" y2="1.27" width="0.1524" layer="21"/>
+<wire x1="-2.159" y1="-1.27" x2="-2.159" y2="1.27" width="0.1524" layer="21"/>
+<wire x1="-1.905" y1="1.524" x2="1.905" y2="1.524" width="0.1524" layer="21"/>
+<wire x1="0.762" y1="0.762" x2="0.762" y2="-0.762" width="0.1524" layer="51"/>
+<wire x1="-0.762" y1="0.762" x2="-0.762" y2="-0.762" width="0.1524" layer="51"/>
+<wire x1="1.524" y1="0" x2="2.032" y2="0" width="0.1524" layer="51"/>
+<wire x1="-1.524" y1="0" x2="-2.032" y2="0" width="0.1524" layer="51"/>
+<wire x1="0.762" y1="0.762" x2="0.762" y2="-0.762" width="0.1524" layer="51" curve="-180"/>
+<wire x1="-0.762" y1="0.762" x2="-0.762" y2="-0.762" width="0.1524" layer="51" curve="180"/>
+<smd name="1" x="-1.27" y="0" dx="1.27" dy="2.54" layer="1"/>
+<smd name="2" x="1.27" y="0" dx="1.27" dy="2.54" layer="1"/>
+<text x="-2.159" y="1.778" size="1.27" layer="25" ratio="10">&gt;NAME</text>
+<text x="1" y="0" size="0.02" layer="27">&gt;VALUE</text>
+<rectangle x1="0.762" y1="-0.762" x2="1.016" y2="0.762" layer="51"/>
+<rectangle x1="1.016" y1="-0.635" x2="1.27" y2="0.635" layer="51"/>
+<rectangle x1="1.27" y1="-0.508" x2="1.397" y2="0.508" layer="51"/>
+<rectangle x1="1.397" y1="-0.254" x2="1.524" y2="0.254" layer="51"/>
+<rectangle x1="-1.016" y1="-0.762" x2="-0.762" y2="0.762" layer="51"/>
+<rectangle x1="-1.27" y1="-0.635" x2="-1.016" y2="0.635" layer="51"/>
+<rectangle x1="-1.397" y1="-0.508" x2="-1.27" y2="0.508" layer="51"/>
+<rectangle x1="-1.524" y1="-0.254" x2="-1.397" y2="0.254" layer="51"/>
+<rectangle x1="0.9652" y1="-0.7112" x2="1.0922" y2="-0.5842" layer="51"/>
+<rectangle x1="1.3462" y1="-0.3556" x2="1.4732" y2="-0.2286" layer="51"/>
+<rectangle x1="1.3462" y1="0.2032" x2="1.4732" y2="0.3302" layer="51"/>
+<rectangle x1="0.9652" y1="0.5842" x2="1.0922" y2="0.7112" layer="51"/>
+<rectangle x1="-1.0922" y1="-0.7112" x2="-0.9652" y2="-0.5842" layer="51"/>
+<rectangle x1="-1.4478" y1="-0.3302" x2="-1.3208" y2="-0.2032" layer="51"/>
+<rectangle x1="-1.4732" y1="0.2032" x2="-1.3462" y2="0.3302" layer="51"/>
+<rectangle x1="-1.1176" y1="0.5842" x2="-0.9906" y2="0.7112" layer="51"/>
+</package>
+</packages>
+<packages3d>
+<package3d name="SJ" urn="urn:adsk.eagle:package:15471/1" type="box" library_version="1">
+<description>Solder jumper</description>
+<packageinstances>
+<packageinstance name="SJ"/>
+</packageinstances>
+</package3d>
+<package3d name="SJW" urn="urn:adsk.eagle:package:15507/1" type="box" library_version="1">
+<description>Solder jumper</description>
+<packageinstances>
+<packageinstance name="SJW"/>
+</packageinstances>
+</package3d>
+</packages3d>
+<symbols>
+<symbol name="SJ" urn="urn:adsk.eagle:symbol:15431/1" library_version="1">
+<wire x1="0.381" y1="0.635" x2="0.381" y2="-0.635" width="1.27" layer="94" curve="-180" cap="flat"/>
+<wire x1="-0.381" y1="-0.635" x2="-0.381" y2="0.635" width="1.27" layer="94" curve="-180" cap="flat"/>
+<wire x1="2.54" y1="0" x2="1.651" y2="0" width="0.1524" layer="94"/>
+<wire x1="-2.54" y1="0" x2="-1.651" y2="0" width="0.1524" layer="94"/>
+<text x="-2.54" y="2.54" size="1.778" layer="95">&gt;NAME</text>
+<text x="-2.54" y="-3.81" size="1.778" layer="96">&gt;VALUE</text>
+<pin name="2" x="5.08" y="0" visible="pad" length="short" direction="pas" swaplevel="1" rot="R180"/>
+<pin name="1" x="-5.08" y="0" visible="pad" length="short" direction="pas" swaplevel="1"/>
+</symbol>
+</symbols>
+<devicesets>
+<deviceset name="SJ" urn="urn:adsk.eagle:component:15508/1" prefix="SJ" uservalue="yes" library_version="1">
+<description>SMD solder &lt;b&gt;JUMPER&lt;/b&gt;</description>
+<gates>
+<gate name="1" symbol="SJ" x="0" y="0"/>
+</gates>
+<devices>
+<device name="" package="SJ">
+<connects>
+<connect gate="1" pin="1" pad="1"/>
+<connect gate="1" pin="2" pad="2"/>
+</connects>
+<package3dinstances>
+<package3dinstance package3d_urn="urn:adsk.eagle:package:15471/1"/>
+</package3dinstances>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+<device name="W" package="SJW">
+<connects>
+<connect gate="1" pin="1" pad="1"/>
+<connect gate="1" pin="2" pad="2"/>
+</connects>
+<package3dinstances>
+<package3dinstance package3d_urn="urn:adsk.eagle:package:15507/1"/>
+</package3dinstances>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+</devices>
+</deviceset>
+</devicesets>
+</library>
 </libraries>
 <attributes>
 </attributes>
@@ -21413,7 +21572,7 @@ part number 2062-2P from STA</description>
 <part name="U1" library="my_parts" library_urn="urn:adsk.eagle:library:225875" deviceset="ESP-07" device="" package3d_urn="urn:adsk.eagle:package:2954232/2" value="ESP-07"/>
 <part name="P+3" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="VCC" device="" value="3V3"/>
 <part name="GND2" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
-<part name="S1" library="my_parts" library_urn="urn:adsk.eagle:library:225875" deviceset="BUTTON" device="SMD" package3d_urn="urn:adsk.eagle:package:2954938/2" value="RESET"/>
+<part name="S1" library="my_parts" library_urn="urn:adsk.eagle:library:225875" deviceset="BUTTON" device="" package3d_urn="urn:adsk.eagle:package:3123504/1" value="RESET"/>
 <part name="GND3" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 <part name="R1" library="resistor" library_urn="urn:adsk.eagle:library:348" deviceset="R-US_" device="R0603" package3d_urn="urn:adsk.eagle:package:26057/1" value="10k"/>
 <part name="GND4" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
@@ -21422,7 +21581,7 @@ part number 2062-2P from STA</description>
 <part name="J1" library="my_parts" library_urn="urn:adsk.eagle:library:225875" deviceset="1X2_5MM_SCREW" device="" package3d_urn="urn:adsk.eagle:package:2604763/2" value="AC  IN"/>
 <part name="GND5" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 <part name="P+5" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="VCC" device="" value="3V3"/>
-<part name="LED2" library="led" library_urn="urn:adsk.eagle:library:259" deviceset="LED" device="SML0805" package3d_urn="urn:adsk.eagle:package:15830/1" value="RST"/>
+<part name="LED2" library="led" library_urn="urn:adsk.eagle:library:259" deviceset="LED" device="SML0805" package3d_urn="urn:adsk.eagle:package:15830/1" value="RESET"/>
 <part name="R4" library="resistor" library_urn="urn:adsk.eagle:library:348" deviceset="R-US_" device="R0805" package3d_urn="urn:adsk.eagle:package:26059/1" value="100"/>
 <part name="J4" library="SparkFun-Connectors" library_urn="urn:adsk.eagle:library:513" deviceset="CONN_04" device="" package3d_urn="urn:adsk.eagle:package:38085/1"/>
 <part name="R6" library="resistor" library_urn="urn:adsk.eagle:library:348" deviceset="R-US_" device="R0603" package3d_urn="urn:adsk.eagle:package:26057/1" value="10k"/>
@@ -21445,11 +21604,17 @@ part number 2062-2P from STA</description>
 <part name="R8" library="resistor" library_urn="urn:adsk.eagle:library:348" deviceset="R-US_" device="R0603" package3d_urn="urn:adsk.eagle:package:26057/1" value="2k"/>
 <part name="R9" library="resistor" library_urn="urn:adsk.eagle:library:348" deviceset="R-US_" device="R0603" package3d_urn="urn:adsk.eagle:package:26057/1" value="2k"/>
 <part name="L1" library="resistor" library_urn="urn:adsk.eagle:library:348" deviceset="L-US" device="L2012C" package3d_urn="urn:adsk.eagle:package:25925/1" value="47nH"/>
+<part name="ADC" library="jumper" library_urn="urn:adsk.eagle:library:252" deviceset="SJ" device="" package3d_urn="urn:adsk.eagle:package:15471/1"/>
+<part name="R10" library="resistor" library_urn="urn:adsk.eagle:library:348" deviceset="R-US_" device="R0603" package3d_urn="urn:adsk.eagle:package:26057/1" value="220K"/>
+<part name="R11" library="resistor" library_urn="urn:adsk.eagle:library:348" deviceset="R-US_" device="R0603" package3d_urn="urn:adsk.eagle:package:26057/1" value="100K"/>
+<part name="GND1" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 </parts>
 <sheets>
 <sheet>
 <plain>
 <text x="-25.4" y="2.54" size="1.778" layer="97">Either one of R2 or R3</text>
+<text x="5.08" y="-10.16" size="1.778" layer="97">In case external ADC doesnt work</text>
+<wire x1="15.24" y1="-7.62" x2="15.24" y2="12.7" width="0.1524" layer="97"/>
 </plain>
 <instances>
 <instance part="U1" gate="G$1" x="48.26" y="35.56"/>
@@ -21487,6 +21652,10 @@ part number 2062-2P from STA</description>
 <instance part="R8" gate="G$1" x="10.16" y="33.02" rot="R180"/>
 <instance part="R9" gate="G$1" x="10.16" y="35.56" rot="R180"/>
 <instance part="L1" gate="G$1" x="-15.24" y="60.96" rot="R180"/>
+<instance part="ADC" gate="1" x="15.24" y="15.24"/>
+<instance part="R10" gate="G$1" x="0" y="15.24" rot="R180"/>
+<instance part="R11" gate="G$1" x="7.62" y="7.62" rot="R270"/>
+<instance part="GND1" gate="1" x="7.62" y="-2.54"/>
 </instances>
 <busses>
 </busses>
@@ -21644,6 +21813,11 @@ part number 2062-2P from STA</description>
 <wire x1="-12.7" y1="27.94" x2="-12.7" y2="12.7" width="0.1524" layer="91"/>
 <junction x="-12.7" y="27.94"/>
 </segment>
+<segment>
+<pinref part="R11" gate="G$1" pin="2"/>
+<wire x1="7.62" y1="2.54" x2="7.62" y2="0" width="0.1524" layer="91"/>
+<pinref part="GND1" gate="1" pin="GND"/>
+</segment>
 </net>
 <net name="RST" class="0">
 <segment>
@@ -21748,8 +21922,9 @@ part number 2062-2P from STA</description>
 <net name="ANALOG" class="0">
 <segment>
 <wire x1="-33.02" y1="22.86" x2="-22.86" y2="22.86" width="0.1524" layer="91"/>
-<wire x1="-22.86" y1="22.86" x2="-10.16" y2="22.86" width="0.1524" layer="91"/>
+<wire x1="-22.86" y1="22.86" x2="-15.24" y2="22.86" width="0.1524" layer="91"/>
 <pinref part="R2" gate="G$1" pin="2"/>
+<wire x1="-15.24" y1="22.86" x2="-10.16" y2="22.86" width="0.1524" layer="91"/>
 <wire x1="-22.86" y1="20.32" x2="-22.86" y2="22.86" width="0.1524" layer="91"/>
 <junction x="-22.86" y="22.86"/>
 <pinref part="R3" gate="G$1" pin="1"/>
@@ -21757,6 +21932,10 @@ part number 2062-2P from STA</description>
 <pinref part="J5" gate="J$1" pin="2"/>
 <pinref part="U2" gate="G$1" pin="A_IN"/>
 <label x="-33.02" y="22.86" size="1.778" layer="95"/>
+<wire x1="-15.24" y1="22.86" x2="-15.24" y2="15.24" width="0.1524" layer="91"/>
+<junction x="-15.24" y="22.86"/>
+<pinref part="R10" gate="G$1" pin="2"/>
+<wire x1="-15.24" y1="15.24" x2="-5.08" y2="15.24" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="N$2" class="0">
@@ -21806,6 +21985,26 @@ part number 2062-2P from STA</description>
 <pinref part="L1" gate="G$1" pin="1"/>
 <wire x1="-15.24" y1="48.26" x2="-15.24" y2="53.34" width="0.1524" layer="91"/>
 <junction x="-15.24" y="48.26"/>
+</segment>
+</net>
+<net name="N$6" class="0">
+<segment>
+<pinref part="U1" gate="G$1" pin="ADC"/>
+<wire x1="30.48" y1="40.64" x2="27.94" y2="40.64" width="0.1524" layer="91"/>
+<wire x1="27.94" y1="40.64" x2="27.94" y2="15.24" width="0.1524" layer="91"/>
+<pinref part="ADC" gate="1" pin="2"/>
+<wire x1="20.32" y1="15.24" x2="27.94" y2="15.24" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="N$4" class="0">
+<segment>
+<pinref part="R11" gate="G$1" pin="1"/>
+<pinref part="R10" gate="G$1" pin="1"/>
+<wire x1="5.08" y1="15.24" x2="7.62" y2="15.24" width="0.1524" layer="91"/>
+<wire x1="7.62" y1="15.24" x2="7.62" y2="12.7" width="0.1524" layer="91"/>
+<pinref part="ADC" gate="1" pin="1"/>
+<wire x1="7.62" y1="15.24" x2="10.16" y2="15.24" width="0.1524" layer="91"/>
+<junction x="7.62" y="15.24"/>
 </segment>
 </net>
 </nets>
