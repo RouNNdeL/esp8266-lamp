@@ -21849,7 +21849,7 @@ part number 2062-2P from STA</description>
 <pinref part="J3" gate="G$1" pin="1"/>
 </segment>
 </net>
-<net name="RX" class="0">
+<net name="TX" class="0">
 <segment>
 <wire x1="68.58" y1="43.18" x2="68.58" y2="55.88" width="0.1524" layer="91"/>
 <wire x1="68.58" y1="55.88" x2="99.06" y2="55.88" width="0.1524" layer="91"/>
@@ -21860,7 +21860,7 @@ part number 2062-2P from STA</description>
 <wire x1="99.06" y1="55.88" x2="99.06" y2="60.96" width="0.1524" layer="91"/>
 </segment>
 </net>
-<net name="TX" class="0">
+<net name="RX" class="0">
 <segment>
 <wire x1="66.04" y1="58.42" x2="96.52" y2="58.42" width="0.1524" layer="91"/>
 <label x="88.9" y="58.42" size="1.778" layer="95"/>
