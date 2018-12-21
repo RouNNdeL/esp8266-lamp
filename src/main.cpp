@@ -39,6 +39,8 @@ void ICACHE_FLASH_ATTR dimTimerISR() {
         digitalWrite(PWM_PIN, 0);
     } else {
         digitalWrite(PWM_PIN, 1);
+        delayMicroseconds(250);
+        digitalWrite(PWM_PIN, 0);
     }
 
     zc_state = 0;
@@ -48,11 +50,13 @@ void ICACHE_FLASH_ATTR zcDetectISR() {
     if(!zc_state) {
         zc_state = 1;
 
-        if(current_brightness < 255 && current_brightness > 0) {
+        if(current_brightness < UINT8_MAX && current_brightness > 0) {
             digitalWrite(PWM_PIN, 0);
 
             uint32_t dimDelay = 30 * (UINT8_MAX - current_brightness) + 400;
             hw_timer_arm(dimDelay);
+        } else if(current_brightness == UINT8_MAX) {
+            digitalWrite(PWM_PIN, 1);
         }
     }
 }
