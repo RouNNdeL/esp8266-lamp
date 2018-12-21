@@ -108,6 +108,7 @@ uint8_t previous_val;
 uint8_t state;
 uint8_t brightness;
 
+uint8_t adc_locked;
 
 void init_eeprom() {
     EEPROM.begin(MEMORY_SIZE);
@@ -150,6 +151,7 @@ void ICACHE_FLASH_ATTR receive_data() {
         brightness = char2int(a[2]) * 16 + char2int(a[3]);
         save_eeprom();
         Serial.print(state ? brightness : 0, 0);
+        adc_locked = 1;
     } else {
 #ifdef SERIAL_DEBUG
         server.send(400, "text/html", "<h2>HTTP 400 Invalid Request</h2>");
@@ -216,7 +218,8 @@ void loop() {
 
         if(value > 255)
             value = 255;
-        if((abs(value - previous_val) > ADC_ACCEPTED_ERROR || (previous_val != value && !value))) {
+        if(!adc_locked || (abs(value - previous_val) > ADC_OVERTAKE_THRESHOLD || (previous_val != value && !value))) {
+            adc_locked = 0;
             state = 1;
             brightness = value;
             Serial.print(brightness, 0);
