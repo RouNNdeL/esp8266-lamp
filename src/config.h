@@ -23,8 +23,13 @@
 #define ZC_PIN 4
 #define PWM_PIN 5
 
+/*
+ * Values lower then 100000 (more than 10 per second) may result in WDT resets
+ * when a request is issued to the HTTP server
+ */
 #define POLLING_DELAY 100000
 #define ADC_OVERTAKE_THRESHOLD 6
+#define ADC_ERROR 2
 #define FADE_BRIGHTNESS 1
 
 #define COMPILE_WIFI 1

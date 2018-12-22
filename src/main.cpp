@@ -12,12 +12,13 @@
 #if COMPILE_MODE == COMPILE_DRIVER
 
 #include "hw_timer.h"
+#include "memory.h"
 
 extern "C" {
 #include "user_interface.h"
 }
 
-uint8_t target_brightness = UINT8_MAX;
+uint8_t target_brightness = 0;
 volatile uint8_t current_brightness = 0;
 volatile uint8_t zc_state = 0;
 
@@ -81,6 +82,9 @@ void setup(void) {
     hw_timer_set_func(dimTimerISR);
 
     attachInterrupt(ZC_PIN, zcDetectISR, RISING);
+
+    /* We do not store the last value in EEPROM so we query the WiFi module for it */
+    Serial.print(UART_POLL_BRIGHTNESS);
 }
 
 void loop(void) {
@@ -210,6 +214,12 @@ void loop() {
         hw_timer_arm(POLLING_DELAY);
     }
 
+    while(Serial.available()) {
+        if(Serial.read() == UART_POLL_BRIGHTNESS) {
+            Serial.print(state ? brightness : 0, 0);
+        }
+    }
+
     while(Wire.available()) {
         char c[2];
         c[0] = Wire.read();
@@ -218,7 +228,8 @@ void loop() {
 
         if(value > 255)
             value = 255;
-        if(!adc_locked || (abs(value - previous_val) > ADC_OVERTAKE_THRESHOLD || (previous_val != value && !value))) {
+        uint8_t d = abs(value - previous_val);
+        if((!adc_locked && d > ADC_ERROR ) || (d > ADC_OVERTAKE_THRESHOLD || (previous_val != value && !value))) {
             adc_locked = 0;
             state = 1;
             brightness = value;
