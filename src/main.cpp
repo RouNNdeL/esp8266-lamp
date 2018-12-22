@@ -168,6 +168,8 @@ void ICACHE_FLASH_ATTR receive_data() {
 void setup() {
     init_eeprom();
     Serial.begin(115200);
+    Serial.print(state ? brightness : 0, 0);
+
     Wire.begin(SDA_PIN, SCL_PIN);
 
     PRINTLN("");
