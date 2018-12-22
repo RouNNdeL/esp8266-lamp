@@ -106,7 +106,7 @@ void loop(void) {
 #include "memory.h"
 #include "communication.h"
 
-WiFiServer server(80);
+WiFiServer server(TCP_PORT);
 
 uint8_t poll_adc;
 uint8_t previous_val;
@@ -157,11 +157,16 @@ void setup() {
     manager.setConfigPortalTimeout(300);
     manager.autoConnect(AP_NAME);
 
-    PRINTLN("|-----------------------|");
-    PRINTLN("| Start HTTP Web Server |");
-    PRINTLN("|-----------------------|");
+    PRINTLN("|------------------|");
+    PRINTLN("| Start TCP Server |");
+    PRINTLN("|------------------|");
 
     server.begin();
+
+    HTTPClient http;
+    http.begin(HTTP_REGISTER_URL + String("?device_id=") + DEVICE_ID, HTTP_SERVER_HTTPS_FINGERPRINT);
+    http.POST(String(TCP_PORT));
+    http.end();
 
     hw_timer_init(NMI_SOURCE, 0);
     hw_timer_set_func(adc_poll);
@@ -184,7 +189,6 @@ void loop() {
                     if(client.available() == 2) {
                         state = client.read();
                         brightness = client.read();
-                        save = 1;
                         Serial.print(state ? brightness : 0, 0);
                         client.print(TCP_SUCCESS);
                     } else {
