@@ -1,0 +1,15 @@
+//
+// Created by Krzysiek on 2018-12-22.
+//
+
+#ifndef WIFILAMP_COMMUNICATION_H
+#define WIFILAMP_COMMUNICATION_H
+
+#define UART_POLL_BRIGHTNESS 0xA1
+
+#define TCP_DATA 0xB0
+#define TCP_RESTART 0xE0
+#define TCP_SUCCESS 0x00
+#define TCP_INVALID_REQUEST 0xFF
+
+#endif //WIFILAMP_COMMUNICATION_H

@@ -102,29 +102,21 @@ void loop(void) {
 #include <ArduinoOTA.h>
 #include <WiFiManager.h>
 #include <EEPROM.h>
+#include <ESP8266HTTPClient.h>
 #include "memory.h"
+#include "communication.h"
 
-ESP8266WebServer server(80);
+WiFiServer server(80);
 
 uint8_t poll_adc;
 uint8_t previous_val;
+uint8_t reported_val;
 
 uint8_t state;
 uint8_t brightness;
 
 uint8_t adc_locked;
-
-void init_eeprom() {
-    EEPROM.begin(MEMORY_SIZE);
-    state = EEPROM.read(ADDRESS_STATE);
-    brightness = EEPROM.read(ADDRESS_BRIGHTNESS);
-}
-
-void save_eeprom() {
-    EEPROM.write(ADDRESS_STATE, state);
-    EEPROM.write(ADDRESS_BRIGHTNESS, brightness);
-    EEPROM.commit();
-}
+uint16_t poll_count;
 
 uint8_t char2int(char input) {
     if(input >= '0' && input <= '9')
@@ -140,33 +132,7 @@ void ICACHE_FLASH_ATTR adc_poll() {
     poll_adc = 1;
 }
 
-void ICACHE_FLASH_ATTR restart() {
-    server.send(200, "text/html",
-                F("<p>Your device is restarting...</p><p id=\"a\">It should come online in 15s</p><script>var a=15;setInterval(function(){a--;if(!a)window.location=\"/\";document.getElementById(\"a\").innerHTML=\"It should come online in \"+a+\"s\";},1000)</script>"));
-    delay(500);
-    ESP.restart();
-}
-
-void ICACHE_FLASH_ATTR receive_data() {
-    if(server.hasArg("plain") && server.method() == HTTP_PUT && server.arg("plain").length() == MEMORY_SIZE * 2) {
-        auto a = server.arg("plain");
-        server.send(204);
-        state = char2int(a[0]) * 16 + char2int(a[1]);
-        brightness = char2int(a[2]) * 16 + char2int(a[3]);
-        save_eeprom();
-        Serial.print(state ? brightness : 0, 0);
-        adc_locked = 1;
-    } else {
-#ifdef SERIAL_DEBUG
-        server.send(400, "text/html", "<h2>HTTP 400 Invalid Request</h2>");
-#else
-        server.send(400);
-#endif /* SERIAL_DEBUG */
-    }
-}
-
 void setup() {
-    init_eeprom();
     Serial.begin(115200);
     Serial.print(state ? brightness : 0, 0);
 
@@ -195,11 +161,7 @@ void setup() {
     PRINTLN("| Start HTTP Web Server |");
     PRINTLN("|-----------------------|");
 
-    server.on("/data", HTTP_PUT, receive_data);
-    server.on("/restart", restart);
     server.begin();
-
-    ArduinoOTA.begin();
 
     hw_timer_init(NMI_SOURCE, 0);
     hw_timer_set_func(adc_poll);
@@ -207,10 +169,36 @@ void setup() {
 }
 
 void loop() {
-    server.handleClient();
-    ArduinoOTA.handle();
+    WiFiClient client = server.available();
+    if(client) {
+        if(client.available() > 0) {
+            uint8_t command = client.read();
+            switch(command) {
+                case TCP_RESTART:
+                    client.print(TCP_SUCCESS);
+                    client.stop();
+                    delay(250);
+                    ESP.restart();
+                    break;
+                case TCP_DATA:
+                    if(client.available() == 2) {
+                        state = client.read();
+                        brightness = client.read();
+                        save = 1;
+                        Serial.print(state ? brightness : 0, 0);
+                        client.print(TCP_SUCCESS);
+                    } else {
+                        client.print(TCP_INVALID_REQUEST);
+                    }
+                    break;
+                default:
+                    client.print(TCP_INVALID_REQUEST);
+            }
+        }
+    }
 
     if(poll_adc) {
+        poll_count++;
         Wire.requestFrom(0x48, 2);
         poll_adc = 0;
         hw_timer_arm(POLLING_DELAY);
@@ -231,7 +219,7 @@ void loop() {
         if(value > 255)
             value = 255;
         uint8_t d = abs(value - previous_val);
-        if((!adc_locked && d > ADC_ERROR ) || (d > ADC_OVERTAKE_THRESHOLD || (previous_val != value && !value))) {
+        if((!adc_locked && d > ADC_ERROR) || (d > ADC_OVERTAKE_THRESHOLD || (previous_val != value && !value))) {
             adc_locked = 0;
             state = 1;
             brightness = value;
@@ -239,6 +227,19 @@ void loop() {
         }
         previous_val = value;
     }
+
+    if(poll_count > POLL_COUNT_REPORT) {
+        poll_count = 0;
+        if(!adc_locked && reported_val != brightness) {
+            HTTPClient http;
+            http.begin(HTTP_REPORT_URL + String("?device_id=") + DEVICE_ID, HTTP_SERVER_HTTPS_FINGERPRINT);
+            http.POST(String(brightness));
+            http.end();
+            reported_val = brightness;
+        }
+    }
+
+    //if(save) save_eeprom();
 }
 
 #endif

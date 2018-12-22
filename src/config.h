@@ -27,7 +27,8 @@
  * Values lower then 100000 (more than 10 per second) may result in WDT resets
  * when a request is issued to the HTTP server
  */
-#define POLLING_DELAY 100000
+#define POLLING_DELAY 20000
+#define POLL_COUNT_REPORT 100
 #define ADC_OVERTAKE_THRESHOLD 6
 #define ADC_ERROR 2
 #define FADE_BRIGHTNESS 1
@@ -35,6 +36,11 @@
 #define COMPILE_WIFI 1
 #define COMPILE_DRIVER 2
 
+#define HTTP_REPORT_URL "https://iot-api.zdul.xyz/report_state.php"
+#define HTTP_SERVER_HTTPS_FINGERPRINT "01 77 78 5b ee 26 28 11 6f 66 82 4e 6f 02 87 0a c4 c1 34 42"
+
+#ifndef COMPILE_MODE
 #define COMPILE_MODE COMPILE_WIFI
+#endif
 
 #endif //WIFILAMP_CONFIG_H
