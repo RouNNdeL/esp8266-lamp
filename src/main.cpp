@@ -221,12 +221,20 @@ void loop() {
         char c[2];
         c[0] = Wire.read();
         c[1] = Wire.read();
-        uint16_t value = ((c[0] << 8) | c[1]) >> 4;
+        uint16_t value = (c[0] << 8) | c[1];
+        if(value >= ADC_MIN_VALUE) {
+            value -= ADC_MIN_VALUE;
+            value /= ADC_DIVIDE;
+        } else {
+            value = 0;
+        }
 
-        if(value > 255)
+        if(value > 255) {
             value = 255;
+        }
+
         uint8_t d = abs(value - previous_val);
-        if((!adc_locked && d > ADC_ERROR) || (d > ADC_OVERTAKE_THRESHOLD || (previous_val != value && !value))) {
+        if((!adc_locked && d >= ADC_ERROR) || d >= ADC_OVERTAKE_THRESHOLD) {
             adc_locked = 0;
             state = 1;
             brightness = value;

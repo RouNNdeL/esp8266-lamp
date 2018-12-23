@@ -23,6 +23,9 @@
 #define ZC_PIN 4
 #define PWM_PIN 5
 
+#define ADC_MIN_VALUE 0x3A
+#define ADC_DIVIDE 0x0C
+
 /*
  * Values lower then 100000 (more than 10 per second) may result in WDT resets
  * when a request is issued to the HTTP server
