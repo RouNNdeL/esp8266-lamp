@@ -108,15 +108,17 @@ void loop(void) {
 
 WiFiServer server(TCP_PORT);
 
-uint8_t poll_adc;
-uint8_t previous_val;
-uint8_t reported_val;
+volatile uint8_t poll_adc = 0;
+uint8_t previous_value = 0;
+uint8_t previous_value_for_buffer = 0;
+uint8_t reported_val = 0;
 
-uint8_t state;
-uint8_t brightness;
+uint8_t state = 0;
+uint8_t brightness = 0;
 
-uint8_t adc_locked;
-uint16_t poll_count;
+uint8_t adc_locked = 0;
+int16_t change_buffer[USER_INTERACTION_BUFFER_SIZE] = {0};
+uint8_t change_counter = 0;
 
 uint8_t char2int(char input) {
     if(input >= '0' && input <= '9')
@@ -130,6 +132,14 @@ uint8_t char2int(char input) {
 
 void ICACHE_FLASH_ATTR adc_poll() {
     poll_adc = 1;
+}
+
+uint8_t sum_change_buffer() {
+    int16_t sum = 0;
+    for(uint8_t i = 0; i < USER_INTERACTION_BUFFER_SIZE; ++i) {
+        sum += change_buffer[i];
+    }
+    return abs(sum);
 }
 
 void setup() {
@@ -205,9 +215,9 @@ void loop() {
     }
 
     if(poll_adc) {
-        poll_count++;
         Wire.requestFrom(0x48, 2);
         poll_adc = 0;
+        change_counter++;
         hw_timer_arm(POLLING_DELAY);
     }
 
@@ -229,32 +239,45 @@ void loop() {
             value = 0;
         }
 
-        if(value > 255) {
-            value = 255;
+        if(value > UINT8_MAX) {
+            value = UINT8_MAX;
         }
 
-        uint8_t d = abs(value - previous_val);
-        if((!adc_locked && (d >= ADC_ERROR || (value != previous_val && !value))) || d >= ADC_OVERTAKE_THRESHOLD) {
+        int16_t change = value - previous_value_for_buffer;
+        previous_value_for_buffer = value;
+        memmove(change_buffer + sizeof(*change_buffer), change_buffer,
+                (USER_INTERACTION_BUFFER_SIZE - 1));
+        change_buffer[0] = change;
+
+        uint8_t d = abs(value - previous_value);
+        if((!adc_locked && (d >= ADC_ERROR || (value != previous_value && (!value || value == UINT8_MAX))))
+           || d >= ADC_OVERTAKE_THRESHOLD) {
             adc_locked = 0;
             state = 1;
             brightness = value;
-            previous_val = value;
+            previous_value = value;
             Serial.print(brightness, 0);
         }
-    }
 
-    if(poll_count > POLL_COUNT_REPORT) {
-        poll_count = 0;
-        if(!adc_locked && reported_val != brightness) {
-            HTTPClient http;
-            http.begin(HTTP_REPORT_URL + String("?device_id=") + DEVICE_ID, HTTP_SERVER_HTTPS_FINGERPRINT);
-            http.POST(String(brightness));
-            http.end();
-            reported_val = brightness;
+        uint8_t sum = sum_change_buffer();
+
+        if(sum > USER_INTERACTION_LOCK_THRESHOLD){
+            change_counter = 0;
+        }
+
+        if(change_counter > USER_INTERACTION_LOCK_DELAY ) {
+            change_counter = 0;
+            if(!adc_locked && reported_val != brightness) {
+                /* Lock the ADC after user stopped interacting with the ADC to prevent flicker */
+                adc_locked = 1;
+                HTTPClient http;
+                http.begin(HTTP_REPORT_URL + String("?device_id=") + DEVICE_ID, HTTP_SERVER_HTTPS_FINGERPRINT);
+                http.POST(String(brightness));
+                http.end();
+                reported_val = brightness;
+            }
         }
     }
-
-    //if(save) save_eeprom();
 }
 
 #endif

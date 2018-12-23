@@ -26,14 +26,12 @@
 #define ADC_MIN_VALUE 0x0390
 #define ADC_DIVIDE 0x0C
 
-/*
- * Values lower then 100000 (more than 10 per second) may result in WDT resets
- * when a request is issued to the HTTP server
- */
 #define POLLING_DELAY 20000
-#define POLL_COUNT_REPORT 100
+#define USER_INTERACTION_BUFFER_SIZE 100 /* In terms of ADC polls*/
+#define USER_INTERACTION_LOCK_THRESHOLD 16
+#define USER_INTERACTION_LOCK_DELAY 100
 #define ADC_OVERTAKE_THRESHOLD 20
-#define ADC_ERROR 4
+#define ADC_ERROR 3
 #define FADE_BRIGHTNESS 1
 
 #define COMPILE_WIFI 1
