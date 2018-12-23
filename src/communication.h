@@ -9,7 +9,7 @@
 
 #define TCP_DATA 0xB0
 #define TCP_RESTART 0xE0
-#define TCP_SUCCESS 0x00
+#define TCP_SUCCESS 0x10
 #define TCP_INVALID_REQUEST 0xFF
 
 #endif //WIFILAMP_COMMUNICATION_H

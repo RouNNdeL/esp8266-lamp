@@ -180,7 +180,8 @@ void loop() {
             uint8_t command = client.read();
             switch(command) {
                 case TCP_RESTART:
-                    client.print(TCP_SUCCESS);
+                    client.print(TCP_SUCCESS, 0);
+                    client.flush();
                     client.stop();
                     delay(250);
                     ESP.restart();
@@ -189,15 +190,17 @@ void loop() {
                     if(client.available() == 2) {
                         state = client.read();
                         brightness = client.read();
+                        adc_locked = 1;
                         Serial.print(state ? brightness : 0, 0);
-                        client.print(TCP_SUCCESS);
+                        client.print(TCP_SUCCESS, 0);
                     } else {
-                        client.print(TCP_INVALID_REQUEST);
+                        client.print(TCP_INVALID_REQUEST, 0);
                     }
                     break;
                 default:
-                    client.print(TCP_INVALID_REQUEST);
+                    client.print(TCP_INVALID_REQUEST, 0);
             }
+            client.flush();
         }
     }
 
