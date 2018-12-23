@@ -234,13 +234,13 @@ void loop() {
         }
 
         uint8_t d = abs(value - previous_val);
-        if((!adc_locked && d >= ADC_ERROR) || d >= ADC_OVERTAKE_THRESHOLD) {
+        if((!adc_locked && (d >= ADC_ERROR || (value != previous_val && !value))) || d >= ADC_OVERTAKE_THRESHOLD) {
             adc_locked = 0;
             state = 1;
             brightness = value;
+            previous_val = value;
             Serial.print(brightness, 0);
         }
-        previous_val = value;
     }
 
     if(poll_count > POLL_COUNT_REPORT) {

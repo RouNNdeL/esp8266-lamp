@@ -23,7 +23,7 @@
 #define ZC_PIN 4
 #define PWM_PIN 5
 
-#define ADC_MIN_VALUE 0x3A
+#define ADC_MIN_VALUE 0x0390
 #define ADC_DIVIDE 0x0C
 
 /*
@@ -32,7 +32,7 @@
  */
 #define POLLING_DELAY 20000
 #define POLL_COUNT_REPORT 100
-#define ADC_OVERTAKE_THRESHOLD 12
+#define ADC_OVERTAKE_THRESHOLD 20
 #define ADC_ERROR 4
 #define FADE_BRIGHTNESS 1
 
