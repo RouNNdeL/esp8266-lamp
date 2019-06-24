@@ -5,8 +5,8 @@
 #ifndef WIFILAMP_CONFIG_H
 #define WIFILAMP_CONFIG_H
 
-#define VERSION_CODE 1
-#define VERSION_NAME "0.1"
+#define VERSION_CODE 2
+#define VERSION_NAME "1.0"
 #define BUILD_DATE (String(__TIME__)+"@" + __DATE__)
 
 #ifndef AP_NAME
