@@ -13,6 +13,7 @@
 
 #include "hw_timer.h"
 #include "memory.h"
+#include "communication.h"
 
 extern "C" {
 #include "user_interface.h"
@@ -26,15 +27,24 @@ volatile uint8_t zc_state = 0;
 
 
 void ICACHE_FLASH_ATTR dimTimerISR() {
-#if FADE_BRIGHTNESS
-    if(current_brightness > target_brightness) {
-        --current_brightness;
-    } else if(current_brightness < target_brightness) {
-        ++current_brightness;
-    }
+    for(uint8_t i = 0; i < FADE_DOWN_STEPS; i++) {
+        if(current_brightness > target_brightness) {
+#if FADE_BRIGHTNESS_DOWN
+            --current_brightness;
 #else
-    current_brightness = target_brightness;
+            current_brightness = target_brightness;
 #endif
+        }
+    }
+    for(uint8_t i = 0; i < FADE_UP_STEPS; i++) {
+        if(current_brightness < target_brightness) {
+#if FADE_BRIGHTNESS_UP
+            ++current_brightness;
+#else
+            current_brightness = target_brightness;
+#endif
+        }
+    }
 
     if(current_brightness == 0) {
         digitalWrite(PWM_PIN, 0);
@@ -47,7 +57,7 @@ void ICACHE_FLASH_ATTR dimTimerISR() {
     zc_state = 0;
 }
 
-void ICACHE_FLASH_ATTR zcDetectISR() {
+void ICACHE_RAM_ATTR zcDetectISR() {
     if(!zc_state) {
         zc_state = 1;
 
@@ -101,7 +111,6 @@ void loop(void) {
 #include <ESP8266WebServer.h>
 #include <ArduinoOTA.h>
 #include <WiFiManager.h>
-#include <EEPROM.h>
 #include <ESP8266HTTPClient.h>
 #include "memory.h"
 #include "communication.h"
@@ -109,42 +118,46 @@ void loop(void) {
 WiFiServer server(TCP_PORT);
 
 volatile uint8_t poll_adc = 0;
-uint8_t previous_value = 0;
-uint8_t previous_value_for_buffer = 0;
+uint16_t previous_value = 0;
 uint8_t reported_val = 0;
 
-uint8_t state = 0;
+uint8_t adc_lock = 0;
 uint8_t brightness = 0;
+uint8_t previous_brightness = 0;
 
-uint8_t adc_locked = 0;
-int16_t change_buffer[USER_INTERACTION_BUFFER_SIZE] = {0};
 uint8_t change_counter = 0;
+uint16_t avg_buffer[AVG_BUFFER_SIZE] = {0};
 
-uint8_t char2int(char input) {
-    if(input >= '0' && input <= '9')
-        return input - '0';
-    if(input >= 'A' && input <= 'F')
-        return input + 10 - 'A';
-    if(input >= 'a' && input <= 'f')
-        return input + 10 - 'a';
-    return 0;
-}
 
 void ICACHE_FLASH_ATTR adc_poll() {
     poll_adc = 1;
 }
 
-uint8_t sum_change_buffer() {
-    int16_t sum = 0;
-    for(uint8_t i = 0; i < USER_INTERACTION_BUFFER_SIZE; ++i) {
-        sum += change_buffer[i];
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wconversion"
+
+uint16_t get_median() {
+    uint16_t temp_buffer[AVG_BUFFER_SIZE];
+    memcpy(temp_buffer, avg_buffer, AVG_BUFFER_SIZE);
+    uint16_t temp, j, i;
+    for(i = 0; i < AVG_BUFFER_SIZE - 1; i++) {
+        for(j = i + 1; j < AVG_BUFFER_SIZE; j++) {
+            if(temp_buffer[j] < temp_buffer[i]) {
+                // swap elements
+                temp = temp_buffer[i];
+                temp_buffer[i] = temp_buffer[j];
+                temp_buffer[j] = temp;
+            }
+        }
     }
-    return abs(sum);
+
+    return temp_buffer[AVG_BUFFER_SIZE / 2];
 }
+
+#pragma clang diagnostic pop
 
 void setup() {
     Serial.begin(115200);
-    Serial.print(state ? brightness : 0, 0);
 
     Wire.begin(SDA_PIN, SCL_PIN);
 
@@ -198,9 +211,9 @@ void loop() {
                     break;
                 case TCP_DATA:
                     if(client.available() == 2) {
-                        state = client.read();
+                        uint8_t state = client.read();
                         brightness = client.read();
-                        adc_locked = 1;
+                        adc_lock = 1;
                         Serial.print(state ? brightness : 0, 0);
                         client.print(TCP_SUCCESS, 0);
                     } else {
@@ -221,55 +234,41 @@ void loop() {
         hw_timer_arm(POLLING_DELAY);
     }
 
-    while(Serial.available()) {
-        if(Serial.read() == UART_POLL_BRIGHTNESS) {
-            Serial.print(state ? brightness : 0, 0);
-        }
-    }
-
     while(Wire.available()) {
         char c[2];
         c[0] = Wire.read();
         c[1] = Wire.read();
         uint16_t value = (c[0] << 8) | c[1];
-        if(value >= ADC_MIN_VALUE) {
-            value -= ADC_MIN_VALUE;
-            value /= ADC_DIVIDE;
-        } else {
-            value = 0;
+
+        memmove(avg_buffer + 1, avg_buffer, (AVG_BUFFER_SIZE - 1));
+        avg_buffer[0] = value;
+
+        uint16_t median = get_median();
+        if(abs(median - previous_value) > ADC_ERROR) {
+            previous_value = median;
+            if(median >= ADC_MIN_VALUE) {
+                median -= ADC_MIN_VALUE;
+                median /= ADC_DIVIDE;
+            } else {
+                median = 0;
+            }
+
+            if(median > UINT8_MAX) {
+                median = UINT8_MAX;
+            }
+
+            if((!adc_lock && median != brightness) || abs(previous_brightness - median) > ADC_UNLOCK_THRESHOLD) {
+                change_counter = 0;
+                brightness = median;
+                previous_brightness = median;
+                Serial.print(brightness, 0);
+            }
         }
 
-        if(value > UINT8_MAX) {
-            value = UINT8_MAX;
-        }
-
-        int16_t change = value - previous_value_for_buffer;
-        previous_value_for_buffer = value;
-        memmove(change_buffer + sizeof(*change_buffer), change_buffer,
-                (USER_INTERACTION_BUFFER_SIZE - 1));
-        change_buffer[0] = change;
-
-        uint8_t d = abs(value - previous_value);
-        if((!adc_locked && (d >= ADC_ERROR || (value != previous_value && (!value || value == UINT8_MAX))))
-           || d >= ADC_OVERTAKE_THRESHOLD) {
-            adc_locked = 0;
-            state = 1;
-            brightness = value;
-            previous_value = value;
-            Serial.print(brightness, 0);
-        }
-
-        uint8_t sum = sum_change_buffer();
-
-        if(sum > USER_INTERACTION_LOCK_THRESHOLD){
+        if(change_counter > LOCK_REPORT_DELAY) {
+            adc_lock = 1;
             change_counter = 0;
-        }
-
-        if(change_counter > USER_INTERACTION_LOCK_DELAY ) {
-            change_counter = 0;
-            if(!adc_locked && reported_val != brightness) {
-                /* Lock the ADC after user stopped interacting with the ADC to prevent flicker */
-                adc_locked = 1;
+            if(reported_val != brightness) {
                 HTTPClient http;
                 http.begin(HTTP_REPORT_URL + String("?device_id=") + DEVICE_ID, HTTP_SERVER_HTTPS_FINGERPRINT);
                 http.POST(String(brightness));
