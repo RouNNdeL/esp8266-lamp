@@ -158,14 +158,6 @@ uint16_t get_median() {
     return temp_buffer[AVG_BUFFER_SIZE / 2];
 }
 
-void report_state() {
-    HTTPClient http;
-    http.begin(HTTP_REPORT_URL + String("?device_id=") + DEVICE_ID, HTTP_SERVER_HTTPS_FINGERPRINT);
-    http.POST(String(brightness));
-    http.end();
-    reported_val = brightness;
-}
-
 #pragma clang diagnostic pop
 
 void setup() {
@@ -225,7 +217,7 @@ void loop() {
                              R"(", "type": "esp8266_wifi_lamp", "name": ")" + AP_NAME +
                              R"(", "virtual_devices":[{"name": ")" + AP_NAME +
                              R"(", "type": "lamp_analog", "state": )" + (state ? "true" : "false") +
-                             R"(, "brightness": )" + String(brightness * 100 / 255) + R"(}]})";
+                             R"(, "brightness": )" + String(brightness) + R"(}]})";
             udp_discovery.beginPacket(ip, port);
             udp_discovery.print(payload);
             udp_discovery.endPacket();
@@ -239,7 +231,7 @@ void loop() {
             brightness = udp_server.read();
             adc_lock = 1;
             Serial.print(state ? brightness : 0, 0);
-            report_state();
+            change_counter = 0;
         }
     }
 
@@ -316,7 +308,11 @@ void loop() {
             adc_lock = 1;
             change_counter = 0;
             if(reported_val != brightness) {
-                report_state();
+                HTTPClient http;
+                http.begin(HTTP_REPORT_URL + String("?device_id=") + DEVICE_ID, HTTP_SERVER_HTTPS_FINGERPRINT);
+                http.POST(String(brightness));
+                http.end();
+                reported_val = brightness;
             }
         }
     }
