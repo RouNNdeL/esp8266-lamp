@@ -117,12 +117,16 @@ void loop(void) {
 
 WiFiServer server(TCP_PORT);
 
+WiFiUDP udp_discovery;
+WiFiUDP udp_server;
+
 volatile uint8_t poll_adc = 0;
 uint16_t previous_value = 0;
 uint8_t reported_val = 0;
 
 uint8_t adc_lock = 0;
 uint8_t brightness = 0;
+uint8_t state = 0;
 uint8_t previous_brightness = 0;
 
 uint8_t change_counter = 0;
@@ -152,6 +156,14 @@ uint16_t get_median() {
     }
 
     return temp_buffer[AVG_BUFFER_SIZE / 2];
+}
+
+void report_state() {
+    HTTPClient http;
+    http.begin(HTTP_REPORT_URL + String("?device_id=") + DEVICE_ID, HTTP_SERVER_HTTPS_FINGERPRINT);
+    http.POST(String(brightness));
+    http.end();
+    reported_val = brightness;
 }
 
 #pragma clang diagnostic pop
@@ -191,12 +203,46 @@ void setup() {
     http.POST(String(TCP_PORT));
     http.end();
 
+    udp_discovery.begin(UDP_DISCOVERY_PORT);
+    udp_server.begin(UDP_COM_PORT);
+
     hw_timer_init(NMI_SOURCE, 0);
     hw_timer_set_func(adc_poll);
     hw_timer_arm(POLLING_DELAY);
 }
 
 void loop() {
+    int discovery_packet_size = udp_discovery.parsePacket();
+    if(discovery_packet_size) {
+        String packet = udp_discovery.readString();
+        if(packet == UDP_DISCOVERY_MSG) {
+            IPAddress ip = udp_discovery.remoteIP();
+            uint16_t port = udp_discovery.remotePort();
+
+            PRINTLN("Brightness: "+String(brightness));
+
+            String payload = R"({"message": ")" + String(UDP_DISCOVERY_RESPONSE) +
+                             R"(", "type": "esp8266_wifi_lamp", "name": ")" + AP_NAME +
+                             R"(", "virtual_devices":[{"name": ")" + AP_NAME +
+                             R"(", "type": "lamp_analog", "state": )" + (state ? "true" : "false") +
+                             R"(, "brightness": )" + String(brightness * 100 / 255) + R"(}]})";
+            udp_discovery.beginPacket(ip, port);
+            udp_discovery.print(payload);
+            udp_discovery.endPacket();
+        }
+    }
+
+    int data_packet_size = udp_server.parsePacket();
+    if(data_packet_size) {
+        if(data_packet_size == 3 && udp_server.read() == UDP_DATA) {
+            state = udp_server.read();
+            brightness = udp_server.read();
+            adc_lock = 1;
+            Serial.print(state ? brightness : 0, 0);
+            report_state();
+        }
+    }
+
     WiFiClient client = server.available();
     if(client) {
         if(client.available() > 0) {
@@ -211,7 +257,7 @@ void loop() {
                     break;
                 case TCP_DATA:
                     if(client.available() == 2) {
-                        uint8_t state = client.read();
+                        state = client.read();
                         brightness = client.read();
                         adc_lock = 1;
                         Serial.print(state ? brightness : 0, 0);
@@ -261,6 +307,7 @@ void loop() {
                 change_counter = 0;
                 brightness = median;
                 previous_brightness = median;
+                state = brightness ? 1 : 0;
                 Serial.print(brightness, 0);
             }
         }
@@ -269,11 +316,7 @@ void loop() {
             adc_lock = 1;
             change_counter = 0;
             if(reported_val != brightness) {
-                HTTPClient http;
-                http.begin(HTTP_REPORT_URL + String("?device_id=") + DEVICE_ID, HTTP_SERVER_HTTPS_FINGERPRINT);
-                http.POST(String(brightness));
-                http.end();
-                reported_val = brightness;
+                report_state();
             }
         }
     }

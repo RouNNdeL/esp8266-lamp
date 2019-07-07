@@ -27,10 +27,12 @@
 #define ADC_DIVIDE 0x0C
 
 #define POLLING_DELAY 5000
-#define AVG_BUFFER_SIZE 20
+#define AVG_BUFFER_SIZE 30
 #define LOCK_REPORT_DELAY 100 /* In terms of ADC polls*/
-#define ADC_UNLOCK_THRESHOLD 7
+
+#define ADC_UNLOCK_THRESHOLD 8
 #define ADC_ERROR 8
+
 #define FADE_BRIGHTNESS_UP 1
 #define FADE_BRIGHTNESS_DOWN 1
 #define FADE_DOWN_STEPS 3
@@ -40,6 +42,8 @@
 #define COMPILE_DRIVER 2
 
 #define TCP_PORT 80
+#define UDP_DISCOVERY_PORT 8888
+#define UDP_COM_PORT 88
 
 #define HTTP_REGISTER_URL "https://iot-api.zdul.xyz/register.php"
 #define HTTP_REPORT_URL "https://iot-api.zdul.xyz/report_state.php"
