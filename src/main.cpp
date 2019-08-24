@@ -237,6 +237,15 @@ void loop() {
 
     WiFiClient client = server.available();
     if(client) {
+
+        /*
+         * From time to time there are no bytes available, despite a client being.
+         * We wait for some to appear
+         */
+        while(!client.available()) {
+            delay(1);
+        }
+
         if(client.available() > 0) {
             uint8_t command = client.read();
             switch(command) {
