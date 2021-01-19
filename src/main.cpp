@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include "config.h"
 
-#ifdef SERIAL_DEBUG
+#ifdef DEBUG_ESP_CUSTOM
 #define PRINTLN(a) Serial.println(a)
 #define PRINT(a) Serial.print(a)
 #else
@@ -108,17 +108,66 @@ void loop(void) {
 #include "Wire.h"
 #include "hw_timer.h"
 #include <IPAddress.h>
-#include <ESP8266WebServer.h>
 #include <ArduinoOTA.h>
-#include <WiFiManager.h>
-#include <ESP8266HTTPClient.h>
-#include "memory.h"
-#include "communication.h"
+#include <PubSubClient.h>
+#include <ESPAsyncWebServer.h>
+#include <ESPAsyncWiFiManager.h>
+#include <ArduinoJson.h>
 
-WiFiServer server(TCP_PORT);
+PROGMEM const char* discoveryTemplate = "{"
+                                        "\"~\":\"%s\","
+                                        "\"name\":\"%s\","
+                                        "\"uniq_id\":\"%s\","
+                                        "\"cmd_t\":\"~/%s\","
+                                        "\"stat_t\":\"~/%s\","
+                                        "\"schema\":\"json\","
+                                        "\"brightness\": true,"
+                                        "\"dev\":{"
+                                        "\"mf\":\"Krzysztof Zdulski\","
+                                        "\"mdl\":\"Dimmable Lamp\","
+                                        "\"sw\":\"" VERSION "\","
+                                        "\"name\":\"" DEVICE_NAME "\","
+                                        "\"ids\":[\"" DEVICE_ID "\", \"%08x\"],"
+                                        "\"cns\":[[\"mac\", \"%s\"]]"
+                                        "}"
+                                        "}";
 
-WiFiUDP udp_discovery;
-WiFiUDP udp_server;
+PROGMEM const char* discoverySensor = "{"
+                                      "\"~\":\"%s\","
+                                      "\"device_class\":\"signal_strength\","
+                                      "\"name\":\"" SIGNAL_SENSOR_NAME "\","
+                                      "\"uniq_id\":\"%s\","
+                                      "\"stat_t\":\"~/%s\","
+                                      "\"json_attr_t\":\"~/%s\","
+                                      "\"unit_of_meas\":\"dBm\","
+                                      "\"expire_after\": %d,"
+                                      "\"force_update\": true,"
+                                      "\"dev\":{"
+                                      "\"mf\":\"Krzysztof Zdulski\","
+                                      "\"mdl\":\"Dimmable Lamp\","
+                                      "\"sw\":\"" VERSION "\","
+                                      "\"name\":\"" DEVICE_NAME "\","
+                                      "\"ids\":[\"" DEVICE_ID "\", \"%08x\"],"
+                                      "\"cns\":[[\"mac\", \"%s\"]]"
+                                      "}"
+                                      "}";
+
+const char* topicConfigSuffix = "config";
+const char* topicSetSuffix = "set";
+const char* topicStateSuffix = "state";
+const char* topicAttributesSuffix = "attrs";
+
+uint32_t last_state_update = 0;
+
+WiFiClient mqttTcpClient;
+PubSubClient mqtt(mqttTcpClient);
+
+AsyncWebServer server(80);
+DNSServer dns;
+
+char lightTopicPrefix[100];
+char topicSetScan[100];
+char sensorTopicPrefix[100];
 
 volatile uint8_t poll_adc = 0;
 uint16_t previous_value = 0;
@@ -128,10 +177,10 @@ uint8_t adc_lock = 0;
 uint8_t brightness = 0;
 uint8_t state = 0;
 uint8_t previous_brightness = 0;
+bool update = false;
 
 uint8_t change_counter = 0;
 uint16_t avg_buffer[AVG_BUFFER_SIZE] = {0};
-
 
 void ICACHE_FLASH_ATTR adc_poll() {
     poll_adc = 1;
@@ -144,9 +193,9 @@ uint16_t get_median() {
     uint16_t temp_buffer[AVG_BUFFER_SIZE];
     memcpy(temp_buffer, avg_buffer, AVG_BUFFER_SIZE);
     uint16_t temp, j, i;
-    for(i = 0; i < AVG_BUFFER_SIZE - 1; i++) {
-        for(j = i + 1; j < AVG_BUFFER_SIZE; j++) {
-            if(temp_buffer[j] < temp_buffer[i]) {
+    for (i = 0; i < AVG_BUFFER_SIZE - 1; i++) {
+        for (j = i + 1; j < AVG_BUFFER_SIZE; j++) {
+            if (temp_buffer[j] < temp_buffer[i]) {
                 // swap elements
                 temp = temp_buffer[i];
                 temp_buffer[i] = temp_buffer[j];
@@ -158,45 +207,182 @@ uint16_t get_median() {
     return temp_buffer[AVG_BUFFER_SIZE / 2];
 }
 
+
+__attribute__ ((always_inline)) static inline void publish(const char* topic, const char* message, bool persist) {
+    bool success = mqtt.publish(topic, message, persist);
+    if (!success) {
+        PRINT("Failed to publish to ");
+        PRINTLN(topic);
+    } else {
+        PRINT("Published to ");
+        PRINTLN(topic);
+    }
+}
+
+
+void get_topic(char* topic, uint8_t topic_size, char* prefix, const char* device_id, const char* suffix) {
+    snprintf(topic, topic_size, "%s/%s", prefix, device_id);
+    strncat(topic, "/", topic_size - strlen(topic) - 1);
+    strncat(topic, suffix, topic_size - strlen(topic) - 1);
+}
+
+void get_ssid(char ssid[33]) {
+    struct station_config conf;
+    wifi_station_get_config(&conf);
+    memcpy(ssid, conf.ssid, sizeof(conf.ssid));
+    ssid[32] = 0;
+}
+
+void get_ip(char ipStr[16]) {
+    struct ip_info ip;
+    wifi_get_ip_info(STATION_IF, &ip);
+    uint32_t addr = ip.ip.addr;
+    snprintf(ipStr, 16, "%u.%u.%u.%u",
+             addr & 0xFF, (addr >> 8) & 0xFF,
+             (addr >> 16) & 0xFF, (addr >> 24) & 0xFF);
+}
+
+void publish_sensor_update() {
+    PRINTLN("Publish sensor update");
+    sint8 rssi = WiFi.RSSI();
+
+    if (rssi > 10) {
+        return;
+    }
+
+    char ssid[33];
+    char ip[16];
+    char topic[120];
+    char message[64];
+
+    get_topic(topic, sizeof(topic), sensorTopicPrefix, SIGNAL_SENSOR_ID, topicStateSuffix);
+    snprintf(message, sizeof(message), "%d", rssi);
+    publish(topic, message, true);
+
+    get_ssid(ssid);
+    get_ip(ip);
+    snprintf(message, sizeof(message), R"({"rssi":%d,"ssid":"%s","ip":"%s"})", rssi, ssid, ip);
+
+    get_topic(topic, sizeof(topic), sensorTopicPrefix, SIGNAL_SENSOR_ID, topicAttributesSuffix);
+    publish(topic, message, true);
+}
+
 #pragma clang diagnostic pop
+
+void mqttCallback(char* topic, uint8_t* payload, uint16_t length) {
+    PRINT("Received payload for topic: ");
+    PRINTLN(topic);
+    char deviceId[32];
+    sscanf(topic, topicSetScan, deviceId);
+    PRINT("Device id: ");
+    PRINTLN(deviceId);
+    if (!strcmp(deviceId, DEVICE_ID)) {
+        StaticJsonDocument<JSON_BUFFER_SIZE> json;
+        deserializeJson(json, payload, DeserializationOption::NestingLimit(3));
+
+        if (json.containsKey("brightness") && json["brightness"].is<uint8_t>()) {
+            brightness = json["brightness"];
+
+            update = true;
+        }
+
+        if (json.containsKey("state") && json["state"].is<char*>()) {
+            const char* stateStr = json["state"];
+            if (!strcmp(stateStr, "ON")) {
+                state = 1;
+            } else if (!strcmp(stateStr, "OFF")) {
+                state = 0;
+            }
+            update = true;
+        }
+    }
+}
+
+void sendUpdate() {
+    StaticJsonDocument<JSON_BUFFER_SIZE> json;
+    json["state"] = state ? "ON" : "OFF";
+    json["brightness"] = brightness;
+
+    char topic[120];
+    get_topic(topic, sizeof(topic), lightTopicPrefix, DEVICE_ID, topicStateSuffix);
+
+    char message[JSON_BUFFER_SIZE];
+    serializeJson(json, message);
+    publish(topic, message, true);
+}
 
 void setup() {
     Serial.begin(115200);
 
     Wire.begin(SDA_PIN, SCL_PIN);
 
-    PRINTLN("");
-    PRINTLN("|----------------------|");
-    PRINTLN("|---- Begin Startup ---|");
-    PRINTLN("| AC Dimmer by RouNdeL |");
-    PRINTLN("|----------------------|");
+    AsyncWiFiManager wifiManager(&server, &dns);
+#ifdef DEBUG_ESP_CUSTOM
+    wifiManager.setDebugOutput(true);
+#endif // DEBUG_ESP_CUSTOM
+    wifiManager.autoConnect(DEVICE_NAME);
 
-    PRINTLN("Version Name: " + String(VERSION_NAME));
-    PRINTLN("Version Code: " + String(VERSION_CODE));
-    PRINTLN("Build Date: " + BUILD_DATE);
-    PRINTLN("Device Id: " + String(DEVICE_ID));
+    //mqttTcpClient.setInsecure();
+    mqtt.setServer(MQTT_BROKER_HOST, MQTT_BROKER_PORT);
+    mqtt.setCallback(mqttCallback);
+    mqtt.setBufferSize(512); // Temporally increase buffer size for discovery payloads
 
-    WiFiManager manager;
-#ifndef SERIAL_DEBUG
-    manager.setDebugOutput(0);
-#endif /* SERIAL_DEBUG */
-    manager.setAPStaticIPConfig(IPAddress(192, 168, 4, 1), IPAddress(192, 168, 4, 1), IPAddress(255, 255, 255, 0));
-    manager.setConfigPortalTimeout(300);
-    manager.autoConnect(AP_NAME);
+    char nodeId[sizeof(MQTT_NODE_ID_PREFIX) + 16];
+    snprintf(nodeId, sizeof(nodeId), "%s_%08x", MQTT_NODE_ID_PREFIX, ESP.getChipId());
+    mqtt.connect(nodeId, MQTT_USER, MQTT_PASSWORD);
 
-    PRINTLN("|------------------|");
-    PRINTLN("| Start TCP Server |");
-    PRINTLN("|------------------|");
+    size_t jsonSize = max(strlen(discoveryTemplate), strlen(discoverySensor)) + 192;
+    mqtt.setBufferSize(jsonSize + 64);
 
-    server.begin();
+    snprintf(lightTopicPrefix, sizeof(lightTopicPrefix), "%s/light/%s", MQTT_DISCOVERY_PREFIX, nodeId);
+    snprintf(sensorTopicPrefix, sizeof(sensorTopicPrefix), "%s/sensor/%s", MQTT_DISCOVERY_PREFIX, nodeId);
+    snprintf(topicSetScan, sizeof(topicSetScan), "%s/%%[^/]/%s", lightTopicPrefix, topicSetSuffix);
 
-    HTTPClient http;
-    http.begin(HTTP_REGISTER_URL + String("?device_id=") + DEVICE_ID, HTTP_SERVER_HTTPS_FINGERPRINT);
-    http.POST(String(TCP_PORT));
-    http.end();
+    char topic[120];
+    char deviceUid[sizeof(nodeId) + 32];
+    char* discoveryJson = static_cast<char*>(malloc(jsonSize));
 
-    udp_discovery.begin(UDP_DISCOVERY_PORT);
-    udp_server.begin(UDP_COM_PORT);
+    char macStr[18] = {0};
+    uint8_t mac[6];
+    WiFi.macAddress(mac);
+    sprintf(macStr, "%02X:%02X:%02X:%02X:%02X:%02X", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+
+    PRINTLN("Starting discovery");
+    snprintf(topic, sizeof(topic), "%s/%s", lightTopicPrefix, DEVICE_ID);
+    snprintf(deviceUid, sizeof(deviceUid), "%s_%s", nodeId, DEVICE_ID);
+    snprintf(discoveryJson, jsonSize, discoveryTemplate, topic, DEVICE_NAME,
+             deviceUid, topicSetSuffix, topicStateSuffix, ESP.getChipId(), macStr);
+
+
+    bool success;
+    get_topic(topic, sizeof(topic), lightTopicPrefix, DEVICE_ID, topicSetSuffix);
+    success = mqtt.subscribe(topic);
+    if (!success) {
+        PRINT("Failed to subscribe to topic");
+        PRINTLN(topic);
+    } else {
+        PRINT("subscribed to topic ");
+        PRINTLN(topic);
+    }
+
+    get_topic(topic, sizeof(topic), lightTopicPrefix, DEVICE_ID, topicConfigSuffix);
+    publish(topic, discoveryJson, true);
+
+    // Signal sensor discovery
+    snprintf(deviceUid, sizeof(deviceUid), "%s_%s", nodeId, SIGNAL_SENSOR_ID);
+    snprintf(topic, sizeof(topic), "%s/%s", sensorTopicPrefix, SIGNAL_SENSOR_ID);
+
+    snprintf(discoveryJson, jsonSize, discoverySensor, topic, deviceUid,
+             topicStateSuffix, topicAttributesSuffix, SIGNAL_PUBLISH_PERIOD * 2, ESP.getChipId(), macStr);
+
+
+    get_topic(topic, sizeof(topic), sensorTopicPrefix, SIGNAL_SENSOR_ID, topicConfigSuffix);
+    publish(topic, discoveryJson, true);
+
+    free(discoveryJson);
+    mqtt.setBufferSize(256);
+
+    publish_sensor_update();
 
     hw_timer_init(NMI_SOURCE, 0);
     hw_timer_set_func(adc_poll);
@@ -204,85 +390,32 @@ void setup() {
 }
 
 void loop() {
-    int discovery_packet_size = udp_discovery.parsePacket();
-    if(discovery_packet_size) {
-        String packet = udp_discovery.readString();
-        if(packet == UDP_DISCOVERY_MSG) {
-            IPAddress ip = udp_discovery.remoteIP();
-            uint16_t port = udp_discovery.remotePort();
-
-            PRINTLN("Brightness: "+String(brightness));
-
-            String payload = R"({"message": ")" + String(UDP_DISCOVERY_RESPONSE) +
-                             R"(", "type": "esp8266_wifi_lamp", "name": ")" + AP_NAME +
-                             R"(", "virtual_devices":[{"name": ")" + AP_NAME +
-                             R"(", "type": "lamp_analog", "state": )" + (state ? "true" : "false") +
-                             R"(, "brightness": )" + String(brightness) + R"(}]})";
-            udp_discovery.beginPacket(ip, port);
-            udp_discovery.print(payload);
-            udp_discovery.endPacket();
-        }
+    if (millis() > last_state_update + SIGNAL_PUBLISH_PERIOD * 1000) {
+        last_state_update = millis();
+        publish_sensor_update();
     }
 
-    int data_packet_size = udp_server.parsePacket();
-    if(data_packet_size) {
-        if(data_packet_size == 3 && udp_server.read() == UDP_DATA) {
-            state = udp_server.read();
-            brightness = udp_server.read();
-            adc_lock = 1;
-            Serial.print(state ? brightness : 0, 0);
-            change_counter = 0;
-        }
+    if (!mqtt.loop()) {
+        delay(RESTART_DELAY * 1000);
+        ESP.restart();
     }
 
-    WiFiClient client = server.available();
-    if(client) {
-
-        /*
-         * From time to time there are no bytes available, despite a client being.
-         * We wait for some to appear
-         */
-        while(!client.available()) {
-            delay(1);
-        }
-
-        if(client.available() > 0) {
-            uint8_t command = client.read();
-            switch(command) {
-                case TCP_RESTART:
-                    client.print(TCP_SUCCESS, 0);
-                    client.flush();
-                    client.stop();
-                    delay(250);
-                    ESP.restart();
-                    break;
-                case TCP_DATA:
-                    if(client.available() == 2) {
-                        state = client.read();
-                        brightness = client.read();
-                        adc_lock = 1;
-                        Serial.print(state ? brightness : 0, 0);
-                        client.print(TCP_SUCCESS, 0);
-                    } else {
-                        client.print(TCP_INVALID_REQUEST, 0);
-                    }
-                    break;
-                default:
-                    client.print(TCP_INVALID_REQUEST, 0);
-            }
-            client.flush();
-        }
-    }
-
-    if(poll_adc) {
+    if (poll_adc) {
         Wire.requestFrom(0x48, 2);
         poll_adc = 0;
         change_counter++;
         hw_timer_arm(POLLING_DELAY);
     }
 
-    while(Wire.available()) {
-        char c[2];
+    if(update) {
+        update = false;
+        adc_lock = 1;
+        Serial.write(state ? brightness : 0);
+        sendUpdate();
+    }
+
+    while (Wire.available()) {
+        uint8_t c[2];
         c[0] = Wire.read();
         c[1] = Wire.read();
         uint16_t value = (c[0] << 8) | c[1];
@@ -291,36 +424,33 @@ void loop() {
         avg_buffer[0] = value;
 
         uint16_t median = get_median();
-        if(abs(median - previous_value) > ADC_ERROR) {
+        if (abs(median - previous_value) > ADC_ERROR) {
             previous_value = median;
-            if(median >= ADC_MIN_VALUE) {
+            if (median >= ADC_MIN_VALUE) {
                 median -= ADC_MIN_VALUE;
                 median /= ADC_DIVIDE;
             } else {
                 median = 0;
             }
 
-            if(median > UINT8_MAX) {
+            if (median > UINT8_MAX) {
                 median = UINT8_MAX;
             }
 
-            if((!adc_lock && median != brightness) || abs(previous_brightness - median) > ADC_UNLOCK_THRESHOLD) {
+            if ((!adc_lock && median != brightness) || abs(previous_brightness - median) > ADC_UNLOCK_THRESHOLD) {
                 change_counter = 0;
                 brightness = median;
                 previous_brightness = median;
                 state = brightness ? 1 : 0;
-                Serial.print(brightness, 0);
+                Serial.write(brightness);
             }
         }
 
-        if(change_counter > LOCK_REPORT_DELAY) {
+        if (change_counter > LOCK_REPORT_DELAY) {
             adc_lock = 1;
             change_counter = 0;
-            if(reported_val != brightness) {
-                HTTPClient http;
-                http.begin(HTTP_REPORT_URL + String("?device_id=") + DEVICE_ID, HTTP_SERVER_HTTPS_FINGERPRINT);
-                http.POST(String(brightness));
-                http.end();
+            if (reported_val != brightness) {
+                sendUpdate();
                 reported_val = brightness;
             }
         }

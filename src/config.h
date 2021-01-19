@@ -5,17 +5,7 @@
 #ifndef WIFILAMP_CONFIG_H
 #define WIFILAMP_CONFIG_H
 
-#define VERSION_CODE 2
-#define VERSION_NAME "1.0"
-#define BUILD_DATE (String(__TIME__)+"@" + __DATE__)
-
-#ifndef AP_NAME
-#define AP_NAME "Chris' Lamp"
-#endif
-
-#ifndef DEVICE_ID
-#define DEVICE_ID "iot_2"
-#endif
+#define VERSION "2.0.0"
 
 #define SDA_PIN 13
 #define SCL_PIN 12
@@ -28,7 +18,7 @@
 
 #define POLLING_DELAY 5000
 #define AVG_BUFFER_SIZE 30
-#define LOCK_REPORT_DELAY 100 /* In terms of ADC polls*/
+#define LOCK_REPORT_DELAY 500 /* In terms of ADC polls*/
 
 #define ADC_UNLOCK_THRESHOLD 8
 #define ADC_ERROR 8
@@ -41,13 +31,58 @@
 #define COMPILE_WIFI 1
 #define COMPILE_DRIVER 2
 
-#define TCP_PORT 80
-#define UDP_DISCOVERY_PORT 8888
-#define UDP_COM_PORT 88
+#ifndef DEVICE_NAME
+#define DEVICE_NAME "Lamp - Test"
+#endif /* DEVICE_NAME */
 
-#define HTTP_REGISTER_URL "https://iot-api.zdul.xyz/register.php"
-#define HTTP_REPORT_URL "https://iot-api.zdul.xyz/report_state.php"
-#define HTTP_SERVER_HTTPS_FINGERPRINT "01 77 78 5b ee 26 28 11 6f 66 82 4e 6f 02 87 0a c4 c1 34 42"
+#ifndef DEVICE_ID
+#define DEVICE_ID "lamp_test"
+#endif /* DEVICE_ID */
+
+#ifndef SIGNAL_SENSOR_NAME
+#define SIGNAL_SENSOR_NAME "Test - Signal"
+#endif /* SIGNAL_SENSOR_NAME */
+
+// Has to be different from the other IDs
+#ifndef SIGNAL_SENSOR_ID
+#define SIGNAL_SENSOR_ID "test_signal"
+#endif /* SIGNAL_SENSOR_ID */
+// In Seconds
+#ifndef SIGNAL_PUBLISH_PERIOD
+#define SIGNAL_PUBLISH_PERIOD 60
+#endif /* SIGNAL_PUBLISH_PERIOD */
+
+#ifndef JSON_BUFFER_SIZE
+#define JSON_BUFFER_SIZE 256
+#endif /* JSON_BUFFER_SIZE */
+// In Seconds
+#ifndef RESTART_DELAY
+#define RESTART_DELAY 30
+#endif /* RESTART_DELAY */
+
+#ifndef MQTT_BROKER_HOST
+#define MQTT_BROKER_HOST "test.mosquitto.org"
+#endif /* MQTT_BROKER_HOST */
+
+#ifndef MQTT_BROKER_PORT
+#define MQTT_BROKER_PORT 1883
+#endif /* MQTT_BROKER_PORT */
+
+#ifndef MQTT_USER
+#define MQTT_USER "esp"
+#endif /* MQTT_USER */
+
+#ifndef MQTT_PASSWORD
+#define MQTT_PASSWORD "password"
+#endif /* MQTT_PASSWORD */
+
+#ifndef MQTT_NODE_ID_PREFIX
+#define MQTT_NODE_ID_PREFIX "esp_led"
+#endif /* MQTT_NODE_ID_PREFIX */
+
+#ifndef MQTT_DISCOVERY_PREFIX
+#define MQTT_DISCOVERY_PREFIX "homeassistant"
+#endif /* MQTT_DISCOVERY_PREFIX */
 
 #ifndef COMPILE_MODE
 #define COMPILE_MODE COMPILE_WIFI

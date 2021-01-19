@@ -2,4 +2,6 @@
 .pioenvs
 .piolibdeps
 CMakeListsPrivate.txt
-cmake-build-debug
+cmake-build-*
+.pio
+platformio.ini

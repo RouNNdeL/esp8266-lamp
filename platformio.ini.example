@@ -6,18 +6,29 @@
 ;   Advanced options: extra scripting
 ;
 ; Please visit documentation for the other options and examples
-; http://docs.platformio.org/page/projectconf.html
+; https://docs.platformio.org/page/projectconf.html
 
 [env:local_wifi]
 platform = espressif8266
 board = esp07
 framework = arduino
-lib_deps = 567
+lib_deps = 
+	567
+	knolleary/PubSubClient@^2.8.0
+	bblanchon/ArduinoJson@^6.17.2
+	me-no-dev/ESP Async WebServer@^1.2.3
+	alanswx/ESPAsyncWiFiManager@^0.23.0
 build_flags = -D COMPILE_MODE=1
+
 
 [env:local_driver]
 platform = espressif8266
-board = nodemcuv2
+board = esp07
 framework = arduino
-lib_deps = 567
+lib_deps = 
+	567
+	knolleary/PubSubClient@^2.8.0
+	bblanchon/ArduinoJson@^6.17.2
+	me-no-dev/ESP Async WebServer@^1.2.3
+	alanswx/ESPAsyncWiFiManager@^0.23.0
 build_flags = -D COMPILE_MODE=2
